@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>常見濫用管制藥品</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="py-2 border-bottom bg-light header fixed-top">
+      <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="title-wrap">
+          <h1 class="h5 mb-1">常見濫用管制藥品</h1>
+          <p class="text-muted mb-0 small">依「分級」排列</p>
+        </div>
+        <div id="filterBar" class="actions">
+          <div class="d-flex flex-wrap justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-primary filter-btn" data-level="1">第 1 級毒品</button>
+            <button type="button" class="btn btn-outline-primary filter-btn" data-level="2">第 2 級毒品</button>
+            <button type="button" class="btn btn-outline-primary filter-btn" data-level="3">第 3 級毒品</button>
+            <button type="button" class="btn btn-outline-primary filter-btn" data-level="4">第 4 級毒品</button>
+            <button type="button" class="btn btn-outline-secondary filter-btn" data-level="U">未分級</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container my-4" id="app" style="scroll-margin-top: 100px;">
+      <div id="loading" class="alert alert-info">資料載入中…</div>
+      <div id="content" class="d-none"></div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailModalLabel">詳細資訊</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="modalImage" class="mb-3 text-center"></div>
+            <div id="modalInfo" class="mb-3"></div>
+            <div id="modalDesc" class="small text-muted"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="border-top py-3 bg-light">
+      <div class="container text-center">
+        <small>
+          資料來源：
+          <a href="https://data.fda.gov.tw/frontsite/data/DataAction.do?method=doDetail&infoId=50" target="_blank" rel="noopener">衛生福利部食品藥物管理署常見濫用管制藥品資料集</a>
+        </small>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+  </body>
+  </html>
+
