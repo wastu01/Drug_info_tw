@@ -45,6 +45,8 @@ body { padding-top: 96px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  scroll-margin-top: var(--header-offset, 96px);
+  cursor: pointer;
 }
 .collapse-toggle {
   border: none;
