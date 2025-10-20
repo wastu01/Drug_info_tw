@@ -204,10 +204,11 @@
 
       const toggle = document.createElement('button');
       toggle.className = 'collapse-toggle';
+      toggle.setAttribute('type', 'button');
       toggle.setAttribute('aria-label', '收合/展開');
       toggle.setAttribute('data-bs-toggle', 'collapse');
       toggle.setAttribute('data-bs-target', '#' + collapseId);
-      toggle.innerHTML = '<span class="fs-4">▾</span>';
+      toggle.innerHTML = '<span class="fs-4" aria-hidden="true">▾</span>';
       headerRow.appendChild(toggle);
       root.appendChild(headerRow);
 
@@ -221,6 +222,20 @@
       items.forEach(item => row.appendChild(buildCard(item)));
       wrap.appendChild(row);
       root.appendChild(wrap);
+
+      // Make whole header clickable to toggle collapse
+      const iconSpan = toggle.querySelector('span');
+      const collapseInst = bootstrap.Collapse.getOrCreateInstance(wrap, { toggle: false });
+      headerRow.addEventListener('click', (ev) => {
+        // Avoid double toggling due to button's own data attributes by preventing default
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (wrap.classList.contains('show')) collapseInst.hide();
+        else collapseInst.show();
+      });
+      // Keep icon direction in sync
+      wrap.addEventListener('shown.bs.collapse', () => { if (iconSpan) iconSpan.textContent = '▾'; });
+      wrap.addEventListener('hidden.bs.collapse', () => { if (iconSpan) iconSpan.textContent = '▸'; });
     });
 
     dom.content.innerHTML = '';
