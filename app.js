@@ -2,7 +2,7 @@
 
 (function () {
   const JSON_PATH = './常見濫用管制藥品資料集.json';
-  const GROUP_ORDER = ['第一級毒品', '第二級毒品', '第二至三級毒品', '第四級毒品'];
+  const GROUP_ORDER = ['第一級毒品', '第二級毒品', '第三級毒品', '第四級毒品', '未分級'];
 
   const dom = {
     loading: document.getElementById('loading'),
@@ -16,15 +16,19 @@
   // Return all display group names that an item belongs to.
   function groupsForFenji(fenjiRaw) {
     const s = String(fenjiRaw || '').trim();
-    if (!s) return [];
+    if (!s || s === '無') return ['未分級'];
+    // 僅依是否包含「一、二、三、四」來決定分組；可同時落入多組
+    const has1 = s.includes('一');
+    const has2 = s.includes('二');
+    const has3 = s.includes('三');
+    const has4 = s.includes('四');
+
     const result = new Set();
-    if (s.includes('第一')) result.add('第一級毒品');
-    if (s.includes('第二至三級')) result.add('第二至三級毒品');
-    // 單獨「第二級毒品」維持獨立分組
-    if (s.includes('第二')) result.add('第二級毒品');
-    // 所有含「第三」者併入「第二至三級毒品」這個大類
-    if (s.includes('第三')) result.add('第二至三級毒品');
-    if (s.includes('第四')) result.add('第四級毒品');
+    if (has1) result.add('第一級毒品');
+    if (has2) result.add('第二級毒品');
+    if (has3) result.add('第三級毒品');
+    if (has4) result.add('第四級毒品');
+    if (result.size === 0) result.add('未分級');
     // preserve GROUP_ORDER ordering in output
     return GROUP_ORDER.filter(k => result.has(k));
   }
@@ -32,10 +36,15 @@
   function levelMatches(item, level) {
     const fenji = String(item['分級'] || '').trim();
     if (!level) return true;
-    if (level === '1') return fenji.includes('第一');
-    if (level === '2') return fenji.includes('第二') || fenji.includes('第二至三級');
-    if (level === '3') return fenji.includes('第三') || fenji.includes('第二至三級');
-    if (level === '4') return fenji.includes('第四');
+    const has1 = fenji.includes('一');
+    const has2 = fenji.includes('二');
+    const has3 = fenji.includes('三');
+    const has4 = fenji.includes('四');
+    if (level === '1') return has1;
+    if (level === '2') return has2;
+    if (level === '3') return has3;
+    if (level === '4') return has4;
+    if (level === 'U') return (!fenji || fenji === '無' || (!has1 && !has2 && !has3 && !has4));
     return false;
   }
 
@@ -229,7 +238,11 @@
     const header = document.querySelector('header.header');
     if (!header) return;
     const applyPad = () => {
-      document.body.style.paddingTop = header.offsetHeight + 'px';
+      const SCROLL_TWEAK = 3; // 可微調頂端預留距離
+      const pad = header.offsetHeight;
+      document.body.style.paddingTop = pad + 'px';
+      // 將值同步到 CSS 變數，供 scroll-margin-top 使用
+      document.documentElement.style.setProperty('--header-offset', (pad + SCROLL_TWEAK) + 'px');
     };
     applyPad();
     window.addEventListener('resize', applyPad);
@@ -320,8 +333,9 @@
     let key;
     if (level === '1') key = '第一級毒品';
     else if (level === '2') key = '第二級毒品';
-    else if (level === '3') key = '第二至三級毒品';
+    else if (level === '3') key = '第三級毒品';
     else if (level === '4') key = '第四級毒品';
+    else if (level === 'U') key = '未分級';
     else return null;
     return 'sec-' + key.replaceAll(/[^\w\u4e00-\u9fa5]/g, '');
   }
@@ -346,10 +360,8 @@
     inst.show();
 
     if (opts.scroll && headerEl) {
-      const header = document.querySelector('header.header');
-      const offset = header ? header.offsetHeight + 8 : 80;
-      const top = headerEl.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
+      // 使用 CSS scroll-margin-top 配合 scrollIntoView
+      headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
