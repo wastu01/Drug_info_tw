@@ -1,0 +1,58 @@
+/* Basic card visuals and filter states */
+.drug-card {
+  transition: filter .2s ease, opacity .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.drug-card.muted {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.drug-card.highlight {
+  background-color: rgba(255, 246, 224, 0.95);
+  backdrop-filter: blur(50px) contrast(.8);
+  opacity: 1;
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+.drug-img-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.drug-img {
+  max-height: 160px;
+  object-fit: contain;
+}
+
+.img-fallback { width: 100%; min-height: 120px; }
+
+.field-label {
+  color: #6c757d;
+}
+
+.drug-desc {
+  white-space: pre-wrap;
+}
+
+/* Space for fixed header; JS will refine this at runtime */
+body { padding-top: 96px; }
+
+/* Group header row */
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.collapse-toggle {
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  cursor: pointer;
+}
+.collapse-toggle:focus { outline: none; }
+.header .actions .btn { white-space: nowrap; }
+.header .title-wrap { min-width: 220px; }
+.header .container { row-gap: .25rem; }
