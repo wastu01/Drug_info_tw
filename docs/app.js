@@ -244,6 +244,9 @@
 
     installFilters();
     installHeaderOffset();
+
+    // After rendering drug groups, append bulletins download section
+    loadBulletins(root);
   }
 
   function installHeaderOffset() {
@@ -431,3 +434,103 @@
   load();
 })();
 
+// Bulletin downloads (管制藥品簡訊)
+async function loadBulletins(root) {
+  try {
+    const resp = await fetch('./管制藥品簡訊資料集.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if (!Array.isArray(data) || !data.length) return;
+
+    const section = document.createElement('section');
+    section.className = 'mt-5';
+
+    const header = document.createElement('div');
+    header.className = 'group-header mt-4 mb-2';
+    header.id = 'sec-管制藥品簡訊';
+    const h = document.createElement('h2');
+    h.className = 'h4 mb-0';
+    h.textContent = '管制藥品簡訊下載';
+    header.appendChild(h);
+    section.appendChild(header);
+
+    const list = document.createElement('div');
+    list.className = 'list-group';
+
+    data.forEach(item => {
+      const url = item['網站連結'] || '';
+      const title = item['標題'] || '未命名';
+      const date = item['發布日期'] || '';
+      const fileName = ensurePdfExt(safeFileName(title));
+
+      const row = document.createElement('div');
+      row.className = 'list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap';
+
+      const info = document.createElement('div');
+      info.className = 'me-auto';
+      info.innerHTML = `<strong>${escapeHtml(title)}</strong><br><span class="text-muted small">${escapeHtml(date)}</span>`;
+
+      const actions = document.createElement('div');
+      actions.className = 'd-flex gap-2';
+
+      const view = document.createElement('a');
+      view.className = 'btn btn-outline-secondary btn-sm';
+      view.href = url;
+      view.target = '_blank';
+      view.rel = 'noopener';
+      view.textContent = '線上檢視';
+
+      const dl = document.createElement('button');
+      dl.className = 'btn btn-primary btn-sm';
+      dl.textContent = '下載（正確檔名）';
+      dl.addEventListener('click', () => downloadPdf(url, fileName));
+
+      actions.appendChild(view);
+      actions.appendChild(dl);
+      row.appendChild(info);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+
+    section.appendChild(list);
+    root.appendChild(section);
+  } catch (e) {
+    console.warn('載入管制藥品簡訊資料集失敗：', e);
+  }
+}
+
+function safeFileName(s) {
+  return String(s).replace(/[\\/:*?"<>|]/g, '_').trim();
+}
+
+function ensurePdfExt(name) {
+  return name.toLowerCase().endsWith('.pdf') ? name : name + '.pdf';
+}
+
+async function downloadPdf(url, fileName) {
+  // Try CORS fetch -> Blob -> object URL download
+  try {
+    const resp = await fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const blob = await resp.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    triggerDownload(objectUrl, fileName);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+    return;
+  } catch (e) {
+    // Fallback: direct link with download attr (may be ignored by some browsers if cross-origin)
+    console.warn('CORS 下載失敗，改用直接下載連結：', e);
+    triggerDownload(url, fileName);
+  }
+}
+
+function triggerDownload(href, fileName) {
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = fileName;
+  a.rel = 'noopener';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
